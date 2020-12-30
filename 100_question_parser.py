@@ -57,6 +57,15 @@ class parse_questions(object): # This class grinds through the text file and cre
         """
         generate a json file
         """
+        try:
+            json_file = open(output_file, "w+")
+        except OSError:
+            debug("Unable to open JSON file for output!!")
+            exit(-1)
+
+        json.dump(self.questions.__dict__, json_file)
+
+        json_file.close()
 
         
 
@@ -133,6 +142,7 @@ def main(argv):
     #x.__debug_print__()
     x.__debug_print_questions__()
     x.generate_csv(argv[1])
+    x.generate_json(argv[2])
 
 if __name__ == '__main__':
     main(sys.argv[1:])
