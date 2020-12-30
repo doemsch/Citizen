@@ -1,5 +1,15 @@
 #!/usr/bin/python3
 
+# This program takes the text version of the 100 questions asked on the citizen test and parses them into a json document
+#
+# Howto Run program: 100_question_parser.py 100q.txt
+# output's files 
+#
+#
+# TODO:
+# Add json output function
+# 
+
 import json # We are going to turn these questions into a big json document.
 import sys
 
@@ -52,7 +62,7 @@ class parse_questions(object): # This class grinds through the text file and cre
                 print("\t%s" % a)
 
     
-    def parse_questions(self):
+    def parse_question_data(self):
         """ 
         This function walks through the question data and digs out the questions
         if a line starts with "_:" it's either a subsection or a question.
@@ -93,7 +103,7 @@ class parse_questions(object): # This class grinds through the text file and cre
 def main(argv):
     x = parse_questions(argv[0])
     x.read_in_file()
-    x.parse_questions()
+    x.parse_question_data()
     #x.__debug_print__()
     x.__debug_print_questions__()
 
