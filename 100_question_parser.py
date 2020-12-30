@@ -2,18 +2,35 @@
 
 # This program takes the text version of the 100 questions asked on the citizen test and parses them into a json document
 #
-# Howto Run program: 100_question_parser.py 100q.txt
-# output's files 
-#
+# Howto Run program: 100_question_parser.py [input file] [csv output] [json output]
+# example: 100_question_parser.py 100q.txt 100q.csv 100q.json
 #
 # TODO:
-# Add json output function
-# Adding detailed comments
+# [X] Add json output function
+# [X] Adding detailed comments
+# [ ] Add proper command line arguments
 #
 # just showing that I can edit! :-)
 
 import jsonpickle # We are going to turn these questions into a big json document but because we are using classes, we'll just pickle it.
 import sys, csv # We need sys for comand line
+
+DEBUG = True # Gloabal variable called DEBUG set to "True"
+WARNING = True
+
+def debug(msg):                     # Debug function
+    if DEBUG:                       # IF Debug is True
+        print("DEBUG: %s" % msg)    #   print DEBUG: msg
+
+def fatal(msg, exit_code):          # Fatal function
+    print("FATAL: %s" % msg)                      # Print FATAL: msg
+    exit(exit_code)                 # Exit with supplied error code
+
+def warning(msg):                   # Warning message
+    if WARNING:                     # IF Warning, print message
+        print("WARNING: %s" % msg)  #   print WARNING: msg
+
+
 
 class question(object): # This class will hold all the mechanics for a question
     def __init__(self, section, subsection, question): # we can create an object using question(section, subsection, question)
@@ -22,11 +39,6 @@ class question(object): # This class will hold all the mechanics for a question
         self.subsection = subsection # ditto
         self.answers = [] # an array of answers.
 
-DEBUG = True # Gloabal variable called DEBUG set to "True"
-
-def debug(msg):                     # Debug function
-    if DEBUG:                       # IF Debug is True
-        print("DEBUG: %s" % msg)    #   print msg
 
 
 class parse_questions(object): # This class grinds through the text file and creates questions
@@ -43,10 +55,9 @@ class parse_questions(object): # This class grinds through the text file and cre
         try:                                    # We are going to "try" something
             csv_file = open(output_file, 'w+')  # open "output_file" as a writable file and return a handle called "csv_file"
         except OSError as err:                  #   If something goes wrong with the open, we catch the exception
-            debug("{0}".format(err))            # output a debug message using the thrown error
-            exit(-1)                            # exit with something other than 0 so the shell knows something went wrong
+            fatal("{0}".format(err), -1)        # exit with something other than 0 so the shell knows something went wrong
         
-        writer = csv.writer(csv_file)           # create a CSV writing object
+        writer = csv.writer(csv_file)           # create a CSV writing object that's pointing at our open file handle
 
         writer.writerow(["Question","Answers"]) # Let's write the top row
         for k in self.questions.keys():         # Let's walk down the directory by key
@@ -65,9 +76,9 @@ class parse_questions(object): # This class grinds through the text file and cre
         """
         try:
             json_file = open(output_file, "w+")
-        except OSError:
-            debug("Unable to open JSON file for output!!")
-            exit(-1)
+        except OSError as err:
+            fatal("generate_json {0}".format(err), -1)
+
         # create a frozen snapshot of the self.questions object and encode it into json
         frozen = jsonpickle.encode(self.questions)
         # write out the object
@@ -89,10 +100,9 @@ class parse_questions(object): # This class grinds through the text file and cre
                     continue                                                    # "continue" means "don't continue execution, go back to the top of the loop
                 else:                                                           # the line simply isn't "\n" so let's append it.
                     self.question_data.append(line.rstrip())                             # append the line to the self.question_data array, strip the \n off
-        except OSError as err:
+        except OSError as err:  # Let's capture the exception catch
             print("Problem opening question file: %s" % self.question_file)
-            print("System Error {0}".format(err))
-            exit(-1) # let's bail out.. if we can't open the file why are we here?
+            fatal("System Error {0}".format(err), -1) # let's print FATAL and the actual exception catch msg and exit -1
     
     
     def __debug_print__(self):
@@ -159,9 +169,10 @@ def main(argv):
     x.read_in_file()
     x.parse_question_data()
     #x.__debug_print__()
-    x.__debug_print_questions__()
+    #x.__debug_print_questions__()
     x.generate_csv(argv[1])
     x.generate_json(argv[2])
 
+# Boiler plate
 if __name__ == '__main__':
     main(sys.argv[1:])
