@@ -12,7 +12,7 @@
 # just showing that I can edit! :-)
 
 import json # We are going to turn these questions into a big json document.
-import sys
+import sys, csv
 
 class question(object): # This class will hold all the mechanics for a question
     def __init__(self, section, subsection, question):
@@ -24,7 +24,7 @@ class question(object): # This class will hold all the mechanics for a question
 DEBUG = True
 
 def debug(msg):
-    if DEBUG:
+    if DEBUG: 
         print("DEBUG: %s" % msg)
 
 
@@ -35,6 +35,31 @@ class parse_questions(object): # This class grinds through the text file and cre
         self.questions = {}
 
     
+    def generate_csv(self, output_file):
+        """
+        This function generates a somewhat UGLY csv file
+        """
+        try:
+            csv_file = open(output_file, 'w+')
+        except OSError:
+            debug("Unable to write CSV file: %s" % output_file)
+            exit(-1)
+        
+        writer = csv.writer(csv_file)
+
+        writer.writerow(["Question","Answers"])
+        for k in sorted(self.questions.keys()):
+            writer.writerow([k, ",".join(self.questions[k].answers)])
+
+        csv_file.close()
+
+    def generate_json(self, output_file):
+        """
+        generate a json file
+        """
+
+        
+
     def read_in_file(self):
         """
         This function reads in the file, but skips all the empty lines
@@ -57,7 +82,7 @@ class parse_questions(object): # This class grinds through the text file and cre
         print(self.question_data)
 
     def __debug_print_questions__(self):
-        for k in self.questions.keys():
+        for k in sorted(self.questions.keys()):
             print("Question: %s" %k)
             for a in self.questions[k].answers:
                 print("\t%s" % a)
@@ -107,7 +132,7 @@ def main(argv):
     x.parse_question_data()
     #x.__debug_print__()
     x.__debug_print_questions__()
-
+    x.generate_csv(argv[1])
 
 if __name__ == '__main__':
     main(sys.argv[1:])
