@@ -8,63 +8,71 @@
 #
 # TODO:
 # Add json output function
-# 
+# Adding detailed comments
+#
 # just showing that I can edit! :-)
 
-import json # We are going to turn these questions into a big json document.
-import sys, csv
+import jsonpickle # We are going to turn these questions into a big json document but because we are using classes, we'll just pickle it.
+import sys, csv # We need sys for comand line
 
 class question(object): # This class will hold all the mechanics for a question
-    def __init__(self, section, subsection, question):
-        self.question = question
-        self.section = section
-        self.subsection = subsection
-        self.answers = []
+    def __init__(self, section, subsection, question): # we can create an object using question(section, subsection, question)
+        self.question = question # take the question from the init function and store it in self.question
+        self.section = section # ditto
+        self.subsection = subsection # ditto
+        self.answers = [] # an array of answers.
 
-DEBUG = True
+DEBUG = True # Gloabal variable called DEBUG set to "True"
 
-def debug(msg):
-    if DEBUG: 
-        print("DEBUG: %s" % msg)
+def debug(msg):                     # Debug function
+    if DEBUG:                       # IF Debug is True
+        print("DEBUG: %s" % msg)    #   print msg
 
 
 class parse_questions(object): # This class grinds through the text file and creates questions
-    def __init__(self, question_file):
-        self.question_file = question_file
-        self.question_data = []
-        self.questions = {}
+    def __init__(self, question_file):      # create a parse_questions object and send in a question_file
+        self.question_file = question_file  # store this in self.question_file
+        self.question_data = []             # this will store the data inside self.question_file
+        self.questions = {}                 # dictonary that will store instances of the object "question"
 
     
     def generate_csv(self, output_file):
         """
         This function generates a somewhat UGLY csv file
         """
-        try:
-            csv_file = open(output_file, 'w+')
-        except OSError:
-            debug("Unable to write CSV file: %s" % output_file)
-            exit(-1)
+        try:                                    # We are going to "try" something
+            csv_file = open(output_file, 'w+')  # open "output_file" as a writable file and return a handle called "csv_file"
+        except OSError as err:                  #   If something goes wrong with the open, we catch the exception
+            debug("{0}".format(err))            # output a debug message using the thrown error
+            exit(-1)                            # exit with something other than 0 so the shell knows something went wrong
         
-        writer = csv.writer(csv_file)
+        writer = csv.writer(csv_file)           # create a CSV writing object
 
-        writer.writerow(["Question","Answers"])
-        for k in sorted(self.questions.keys()):
-            writer.writerow([k, ",".join(self.questions[k].answers)])
+        writer.writerow(["Question","Answers"]) # Let's write the top row
+        for k in self.questions.keys():         # Let's walk down the directory by key
+            # write the "key" (which is the question) and then let's take the list of answers and create a comma delmited list.
+            # this is likely totally wrong since you could have an answer in it that also has a comma...
+            writer.writerow([k, ",".join(self.questions[k].answers)]) # insert a key (which is the question) and then let's take the array of 
 
-        csv_file.close()
+        csv_file.close() # close the csv_file file handle
+ 
 
     def generate_json(self, output_file):
         """
-        generate a json file
+        generate a json file that contains the contents of the self.questions structure using jsonpickle
+        input self.questions
+        output: output_file -> jsonpickle'd json document.
         """
         try:
             json_file = open(output_file, "w+")
         except OSError:
             debug("Unable to open JSON file for output!!")
             exit(-1)
-
-        json.dump(self.questions.__dict__, json_file)
-
+        # create a frozen snapshot of the self.questions object and encode it into json
+        frozen = jsonpickle.encode(self.questions)
+        # write out the object
+        json_file.write(frozen)
+        # close the file
         json_file.close()
 
         
@@ -72,15 +80,18 @@ class parse_questions(object): # This class grinds through the text file and cre
     def read_in_file(self):
         """
         This function reads in the file, but skips all the empty lines
+        input: self.question_file
+        output: self.quesiton_data
         """
-        try:
-            for line in open(self.question_file, 'r').readlines():              # Open the file and read in all the lines
+        try:                                                                    # we are opening the file, this could fail..
+            for line in open(self.question_file, 'r').readlines():              # Open the file and read in all the lines and put them in an array
                 if line == '\n':                                                # if the line is simply equal to "\n"
                     continue                                                    # "continue" means "don't continue execution, go back to the top of the loop
-                else:
+                else:                                                           # the line simply isn't "\n" so let's append it.
                     self.question_data.append(line.rstrip())                             # append the line to the self.question_data array, strip the \n off
-        except:
+        except OSError as err:
             print("Problem opening question file: %s" % self.question_file)
+            print("System Error {0}".format(err))
             exit(-1) # let's bail out.. if we can't open the file why are we here?
     
     
@@ -91,6 +102,9 @@ class parse_questions(object): # This class grinds through the text file and cre
         print(self.question_data)
 
     def __debug_print_questions__(self):
+        """
+        Debug function to print out the contents of the self.questions dictonary
+        """
         for k in sorted(self.questions.keys()):
             print("Question: %s" %k)
             for a in self.questions[k].answers:
@@ -103,6 +117,9 @@ class parse_questions(object): # This class grinds through the text file and cre
         if a line starts with "_:" it's either a subsection or a question.
         if a line starts with a "." it's an answer
         if it starts with neither of those it's a secion
+        
+        input: self.question_data
+        output: self.questions dictionary loaded with question objectcs.
         """
         section = ''
         subsection = ''
@@ -113,25 +130,27 @@ class parse_questions(object): # This class grinds through the text file and cre
         # 3. questions
         # 4. answers.
 
-        for line in self.question_data:
+        for line in self.question_data: 
 
             if ":" in line: # case #2
-                subsection = line.split(":")[1]
+                subsection = line.split(":")[1] # split the line on the : into an array but only take the [1] element
                 debug("Subsection: %s" % subsection)
             
             elif "." in line: # this is either a question or an answer?
                 
-                if line.split(".")[0].isdigit(): # case #3 it's a question
-                    quest = line
+                if line.split(".")[0].isdigit(): # case #3 it's a question, split on . into an array and take the element to the left and ask if it's a digit.
+                    quest = line # Since we know it's something like "3. Are you a warlock?" we stick that in the quest varable.
                     debug("Question: %s" % quest)
+                    # Create a question object and stick it in the dictonary with the key being the question (since we know it'll be unique)
                     self.questions[quest] = question(section, subsection, quest) # I know it's redundant to have the key and have a value.
                 
-                elif line.startswith("."): # case #4 answer 
+                elif line.startswith("."): # case #4 answer All the answers startswith "." 
                     debug("Answer: %s" % line)
+                    # take the question and append it to the answers array in the question object.
                     self.questions[quest].answers.append(line[2:]) # Trim the first two characters off the answer since it's ". the answer"
             
-            else: # case #1
-                section = line
+            else: # case #1 # This is section like AMERICAN DEMOCRACY
+                section = line # load the line from the file into the section variable
                 debug("Section = %s" % section)
 
 
