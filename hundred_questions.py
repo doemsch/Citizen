@@ -8,6 +8,26 @@
 # after the twenty questions the score shall be displayed as a percentage
 # I shall be able to exit out of the quiz by typing "X"
 
+# I will outline my thoughts on how I envision this might happen in the sections below so that later I can work on them! :-)
+# I will do some research as I go along...
+
+
+# First I need to be able to work with the data from the Excel spreadsheet
+
+import csv
+
+with open("D:/Doemsch/Python/citizen_q_and_a.csv","r") as citizen:
+    this_file=citizen.read()
+    print(this_file)
+
+
+# Any idea why this does not print the data from the Excel spreadsheet?
+
+
+
+
+
+
 
 
 
