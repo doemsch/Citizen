@@ -4,6 +4,8 @@
 
 import jsonpickle
 
+DEBUG = True
+WARNING = True
 
 def debug(msg):                     # Debug function
     if DEBUG:                       # IF Debug is True
@@ -28,7 +30,7 @@ class question(object): # This class will hold all the mechanics for a question
 
 
 class parse_questions(object): # This class grinds through the text file and creates questions
-    def __init__(self, question_file):      # create a parse_questions object and send in a question_file
+    def __init__(self, question_file=""):      # create a parse_questions object and send in a question_file
         self.question_file = question_file  # store this in self.question_file
         self.question_data = []             # this will store the data inside self.question_file
         self.questions = {}                 # dictonary that will store instances of the object "question"
@@ -90,7 +92,7 @@ class parse_questions(object): # This class grinds through the text file and cre
         if len(self.questions) == 0:
             fatal("Something went wrong loading JSON file, questions are empty")
         debug("Total size of questions: %d" % len(self.questions))
-
+        return self.questions # let's return it as well so we can use it as a helper function
         
 
     def read_in_file(self):
