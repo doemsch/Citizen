@@ -28,6 +28,11 @@ with open("D:/Doemsch/Python/citizen_q_and_a.csv","r") as citizen:
 # okay, next step
 
 # this could be helpful: https://larsesdohr.com/create-a-multiple-choice-test-from-an-excel-sheet-with-python-and-openpyxl/
+# something like below should help me with choosing random questions
+
+import random
+
+print(random.randrange(1, 10)) 
 
 
 
